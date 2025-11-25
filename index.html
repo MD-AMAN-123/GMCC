@@ -1,0 +1,1212 @@
+ <!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GADWAL MASJID CLEANING CAMP</title>
+  <link rel="icon" href="logo1.png" sizes="50px" type="logo1.png/png">
+  <style>
+    :root{--accent:#0b6b4f;--muted:#6b7280;--bg:#f7faf9;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:#111;font-family:Inter,system-ui,Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+
+    header{background:linear-gradient(90deg,var(--accent),#087158);color:white;padding:18px 12px 10px}
+    header .container{display:flex;flex-direction:column;gap:10px}
+    header h1{margin:0 0 6px;font-size:22px}
+    header p.lead{margin:0;color:rgba(255,255,255,0.95);opacity:0.95;font-size:14px}
+
+    .container{max-width:980px;margin:18px auto;padding:0 16px}
+    h1{margin:0 0 6px;font-size:26px}
+    p.lead{margin:0;color:rgba(0,0,0,0.65)} 
+
+    .card{background:white;border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(11,107,79,0.06);margin-bottom:16px}
+    .grid{display:grid;gap:14px}
+    .two{grid-template-columns:1fr 360px}
+    .form-row{display:flex;flex-wrap:wrap;gap:8px}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+    input[type=text],input[type=email],input[type=tel],textarea,select{width:100%;padding:10px;border:1px solid #e6e9eb;border-radius:8px;font-size:14px}
+    button{background:var(--accent);color:white;border:0;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
+    button:hover{background-color: chartreuse;}
+    button.secondary{background:#f3f4f6;color:#111}
+    .muted{color:var(--muted);font-size:13px}
+    .small{font-size:13px}
+
+    .volunteer-list{max-height:320px;overflow:auto}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border-bottom:1px solid #f2f4f5;text-align:left;font-size:14px}
+    .tag{display:inline-block;padding:6px 8px;border-radius:999px;background:#eef7f3;color:#0b6b4f;font-weight:600;font-size:12px}
+
+    footer{Padding:18px;text-align:center;color:var(--muted);font-size:13px}
+
+    /* Admin modal */
+    .modal{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:flex;align-items:center;justify-content:center;z-index:40}
+    .modal .card{width:680px;max-width:96vw}
+
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .actions{display:flex;gap:8px}
+
+    /* Admin tabs */
+    .admin-tabs{display:flex;gap:8px;margin-bottom:8px}
+    .admin-tabs button{padding:8px 10px;border-radius:8px;background:#f3f4f6;color:#111;font-weight:600;border:0;cursor:pointer}
+    .admin-tabs button.active{background:var(--accent);color:white}
+
+    /* Responsive tweaks */
+    @media (max-width:980px){
+      header{padding:14px 10px}
+      .two{grid-template-columns:1fr 320px}
+      .container{padding:0 12px}
+    }
+
+    @media (max-width:760px){
+      header h1{font-size:20px}
+      header p.lead{font-size:13px}
+      .two{grid-template-columns:1fr}
+      .card{padding:12px}
+      .form-row{flex-direction:column}
+      .form-row > div{width:100%}
+      .two aside.card{order:2}
+      .card button{width:100%;display:block}
+      .card .muted{margin-top:8px}
+      .volunteer-list table{display:none}
+      .volunteer-list{display:flex;flex-direction:column;gap:8px;max-height:360px}
+      .modal{align-items:flex-end}
+      .modal .card{width:100%;border-radius:12px 12px 0 0;max-height:88vh;overflow:auto}
+    }
+
+    /* small print */
+    .muted.small{font-size:12px}
+  .slideshow{position:relative;border-radius:8px;overflow:hidden;margin-bottom:14px;height:260px}
+    .slideshow img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:0;transition:opacity .6s ease;will-change:opacity}
+    .slideshow img.active{opacity:1}
+    .slideshow .dots{position:absolute;left:50%;transform:translateX(-50%);bottom:10px;display:flex;gap:8px;z-index:6}
+    .slideshow .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.55);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+    .slideshow .dot.active{background:rgba(255,255,255,0.95)}
+    .navbar{position:absolute;top:0;left:0;width:100%; height: 75px;  padding:12px 18px;z-index:50;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.25);backdrop-filter:blur(4px)}
+.nav-inner{display:flex;align-items:center;gap:0px }
+.logo{font-size:20px;font-weight:700;color:white;text-shadow:0 2px 4px rgba(0,0,0,0.4)}
+.nav-inner{-webkit-animation: heartbeat 4s ease-in-out infinite both; animation: heartbeat 4s ease-in-out infinite both;} @-webkit-keyframes heartbeat { from { -webkit-transform: scale(1); transform: scale(1); -webkit-transform-origin: center center; transform-origin: center center; -webkit-animation-timing-function: ease-out; animation-timing-function: ease-out; } 10% { -webkit-transform: scale(0.91); transform: scale(0.91); -webkit-animation-timing-function: ease-in; animation-timing-function: ease-in; } 17% { -webkit-transform: scale(0.98); transform: scale(0.98); -webkit-animation-timing-function: ease-out; animation-timing-function: ease-out; } 33% { -webkit-transform: scale(0.87); transform: scale(0.87); -webkit-animation-timing-function: ease-in; animation-timing-function: ease-in; } 45% { -webkit-transform: scale(1); transform: scale(1); -webkit-animation-timing-function: ease-out; animation-timing-function: ease-out; } } @keyframes heartbeat { from { -webkit-transform: scale(1); transform: scale(1); -webkit-transform-origin: center center; transform-origin: center center; -webkit-animation-timing-function: ease-out; animation-timing-function: ease-out; } 10% { -webkit-transform: scale(0.91); transform: scale(0.91); -webkit-animation-timing-function: ease-in; animation-timing-function: ease-in; } 17% { -webkit-transform: scale(0.98); transform: scale(0.98); -webkit-animation-timing-function: ease-out; animation-timing-function: ease-out; } 33% { -webkit-transform: scale(0.87); transform: scale(0.87); -webkit-animation-timing-function: ease-in; animation-timing-function: ease-in; } 45% { -webkit-transform: scale(1); transform: scale(1); -webkit-animation-timing-function: ease-out; animation-timing-function: ease-out; } }
+
+  /* Explore slideshow specific styles */
+  .explore-slideshow{position:relative;border-radius:8px;overflow:hidden;margin-top:12px;height:220px}
+  .explore-slideshow img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:0;transition:opacity .6s ease}
+  .explore-slideshow img.active{opacity:1}
+  .explore-slideshow .dots{position:absolute;left:50%;transform:translateX(-50%);bottom:8px;display:flex;gap:6px;z-index:6}
+  .explore-slideshow .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.6);cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,0.2)}
+  .explore-slideshow .dot.active{background:rgba(255,255,255,0.95)}
+
+  /* admin explore thumbnails */
+  .explore-admin-list{display:flex;flex-wrap:wrap;gap:8px}
+  .explore-thumb{width:88px;height:64px;border-radius:6px;overflow:hidden;border:1px solid #e6e9eb;display:flex;align-items:center;justify-content:center;position:relative}
+  .explore-thumb img{width:100%;height:100%;object-fit:cover}
+  .explore-thumb button{position:absolute;right:6px;top:6px;background:rgba(0,0,0,0.6);color:white;border:0;border-radius:6px;padding:4px 6px;cursor:pointer;font-size:12px}
+
+  /* QR modal styles (added for donate flow) */
+  .qr-modal-overlay{ position: fixed; inset: 0; background: rgba(2,6,23,0.6); display:flex; align-items:center; justify-content:center; z-index:80; }
+  .qr-modal { background: white; padding: 18px; border-radius: 12px; width: 360px; max-width:92vw; box-shadow: 0 8px 30px rgba(3,10,10,0.2); text-align:center; }
+  .qr-modal h4{ margin: 0 0 10px; color: #0b6b4f; }
+  .qr-modal img{ width: 220px; height:220px; object-fit:contain; display:block; margin: 10px auto; border-radius:8px; background:#fff; }
+  .qr-actions{ display:flex; gap:8px; justify-content:center; margin-top:10px; }
+  .qr-actions button{ padding:8px 12px; border-radius:8px; font-weight:600; cursor:pointer; border:0; }
+  .qr-actions button.done{ background:#0b6b4f; color:white; }
+  .qr-actions button.cancel{ background:#f3f4f6; color:#111; }
+
+  /* Online message box */
+  #onlineMsg {color: rgb(235, 69, 69); min-height: 70px; resize: vertical; }
+  .admin-online { margin-top: 12px; border-top: 1px dashed #e6e9eb; padding-top: 12px; }
+  .admin-online textarea { min-height: 80px; }
+  .admin-online .btns { display:flex; gap:8px; margin-top:8px; }
+  .insta{
+    font-size: 14px;
+    color: black;
+  }
+  </style>
+</head>
+<body>
+  <header>
+<nav class="navbar">
+<div class="nav-inner">
+<img src="LOGO.png" height="260" width="150" alt="logo">
+</div><h1>GADWAL MASJID CLEANING CAMP</h1>
+</nav>
+    <div class="slideshow" id="masjidSlideshow" aria-label="Masjid images slideshow">
+      <img src="masjid1.png" alt="Masjid 1" loading="lazy" />
+      <img src="masjid2.png" alt="Masjid 2" loading="lazy" />
+      <img src="masjid3.png" alt="Masjid 3" loading="lazy" />
+      <div class="dots" id="slideshowDots" role="tablist" aria-label="Image controls"></div>
+    </div>
+    <div class="container">
+      <h1>Masjid Cleaning Program</h1>
+      <p class="lead">Join our weekly cleaning drive every Saturday — sign up as a volunteer and help keep our masjid clean.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="grid two">
+      <section class="card">
+        <h2>Join the Cleaning Team</h2>
+        <p class="muted">Fill the form below to send a request. We'll notify you when you're accepted as a member.</p>
+
+        <form id="joinForm" novalidate>
+          <div style="margin-top:12px">
+            <label for="name">Full name <span style="color:#d23a3a">*</span></label>
+            <input id="name" name="name" type="text" required placeholder="Your full name" />
+          </div>
+          <div class="form-row" style="margin-top:10px">
+            <div style="flex:1">
+              <label for="phone">Phone (mobile) <span style="color:#d23a3a">*</span></label>
+              <input id="phone" name="phone" type="tel" required placeholder="+91 98XXXXXXXX" pattern="^(+91[\\-\\s]?)?[6-9][0-9]{9}$" title="Enter a valid 10-digit Indian mobile number (optional +91). Example: +919812345678 or 9812345678" />
+            </div>
+            <div style="width:160px">
+              <label for="age">Age</label>
+              <input id="age" name="age" type="text" placeholder="Optional" />
+            </div>
+          </div>
+          <div style="margin-top:10px">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="you@example.com" />
+          </div>
+          <div style="margin-top:10px">
+            <label for="availability">Availability</label>
+            <select id="availability" name="availability">
+              <option value="every">Every Saturday</option>
+              <option value="alternate">Every alternate Saturday</option>
+              <option value="monthly">Monthly</option>
+              <option value="on-call">On call / whenever needed</option>
+            </select>
+          </div>
+          <div style="margin-top:10px">
+            <label for="notes">Notes or skills (optional)</label>
+            <textarea id="notes" name="notes" rows="3" placeholder="E.g., can bring cleaning supplies, can lead a team, first-aid trained"></textarea>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+            <button type="submit">Send Request</button>
+            <button type="button" class="secondary" id="clearBtn">Clear</button>
+            <div class="muted" style="margin-left:auto;font-size:13px">Requests are stored on the server. For dev, page will fallback to local if server unreachable.</div>
+          </div>
+        </form>
+
+        <div id="success" style="display:none;margin-top:12px;padding:10px;border-radius:8px;background:#ecfdf5;color:#064e3b">Your request was sent. We'll contact you after review.</div>
+      </section>
+
+      <aside class="card">
+        <div class="topbar">
+          <div>
+            <div class="tag">Volunteers</div>
+            <div class="muted small" style="margin-top:6px">Pending requests are shown here</div>
+          </div>
+          <div class="actions">
+            <button id="adminBtn" title="Admin panel">Admin</button>
+          </div>
+        </div>
+
+        <div class="volunteer-list" id="volList">
+          <!-- list populated by JS -->
+        </div>
+
+        <hr style="margin:12px 0" />
+
+        <!-- Donation Card -->
+        <div class="card" style="padding:12px;margin-bottom:12px;background:#f8fff9">
+          <h4 style="margin:0 0 8px">Donate for Cleaning Supplies</h4>
+          <p class="muted small">Help buy brooms, cleaning solutions, gloves and masks. Any amount helps.</p>
+
+          <div style="margin-top:10px">
+            <label class="small">Pick an amount</label>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="donAmt" type="button">₹100</button>
+              <button class="donAmt" type="button">₹250</button>
+              <button class="donAmt" type="button">₹500</button>
+              <button class="donAmt" type="button">₹1000</button>
+            </div>
+
+            <div style="margin-top:10px">
+              <label for="customAmount" class="small">Or enter custom amount (₹)</label>
+              <input id="customAmount" type="text" placeholder="e.g., 350" />
+            </div>
+
+            <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+              <button id="donateBtn" type="button">Donate</button>
+              <button id="donExport" class="secondary" type="button">Export Donations</button>
+              <div id="donMsg" class="muted small" style="margin-left:auto"></div>
+            </div>
+
+            <div style="margin-top:12px;font-size:13px">
+              <strong>Total raised:</strong> <span id="totalRaised">₹0</span>
+            </div>
+          </div>
+        </div>
+
+        <h4>Next Scheduled Clean</h4>
+        <p class="muted small">Every Saturday at 9:30 PM. Meeting point: Main entrance of the masjid.</p>
+
+        <!-- NEW: Online message box (read-only for visitors) -->
+        <div style="margin-top:10px">
+          <label class="small">Online message</label>
+          <textarea id="onlineMsg" readonly placeholder="Admin message will appear here (set via Admin panel)"></textarea>
+          <div class="muted small" style="margin-top:6px">(Admins can update this message from the Admin panel.)</div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="exportCsv">Export CSV</button>
+          <button id="mailtoAll" class="secondary" type="button">Email Organizer</button>
+        </div>
+      </aside>
+    </div>
+
+    <section class="card">
+      <h3>How it works</h3>
+      <ol>
+        <li>Members send a request through the form.</li>
+        <li>Admin reviews requests and accepts them to make them official members.</li>
+        <li>Members receive notifications (you can enable email or WhatsApp integrations later).</li>
+      </ol>
+    </section>
+
+    <!-- Explore our work: dynamic slideshow -->
+    <section class="card">
+      <h3>Explore our work</h3>
+      <p class="muted small">A few highlights from our cleaning drives and community work.</p>
+
+      <div class="explore-slideshow" id="exploreSlideshow" aria-label="Explore our work slideshow" tabindex="0">
+        <!-- will be populated from /api/explore -->
+        <img src="work1.png" alt="Work 1" loading="lazy" />
+        <img src="work2.png" alt="Work 2" loading="lazy" />
+        <img src="work3.png" alt="Work 3" loading="lazy" />
+        <img src="work4.png" alt="Work 4" loading="lazy" />
+        <img src="work5.png" alt="Work 5" loading="lazy" />
+        <div class="dots" id="exploreDots" role="tablist" aria-label="Explore controls"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Our Leaders</h3>
+      <p class="muted small">Meet the people who initiated and developed the Masjid Cleaning Program.</p>
+
+      <div style="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-top:16px">
+        <div style="width:260px;background:#d2facc;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,0.05);padding:12px;text-align:center">
+          <div style="width:140px;height:140px;border-radius:50%;overflow:hidden;margin:10px auto;border:4px solid var(--accent)">
+            <img src="founder.jpg" alt="Founder" style="width:100%;height:100%;object-fit:cover">
+          </div>
+          <h4 style="margin:0;font-size:18px">Founder</h4>
+          <p class="muted small" style="margin-top:6px">Initiated the vision behind the Masjid Cleaning Movement.</p>
+        </div>
+        
+        <div style="width:260px;background:#d2facc;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,0.05);padding:12px;text-align:center">
+          <div style="width:140px;height:140px;border-radius:50%;overflow:hidden;margin:10px auto;border:4px solid var(--accent)">
+            <img src="admin.jpg" alt="Developer" style="width:100%;height:100%;object-fit:cover">
+          </div>
+          <h4 style="margin:0;font-size:18px">Admin</h4>
+          <p class="muted small" style="margin-top:6px">Manager & Admin.</p>
+        </div>
+        <div style="width:260px;background:#d2facc;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,0.05);padding:12px;text-align:center">
+          <div style="width:140px;height:140px;border-radius:50%;overflow:hidden;margin:10px auto;border:4px solid var(--accent)">
+            <img src="developer.jpg" alt="Developer" style="width:100%;height:100%;object-fit:cover">
+          </div>
+          <h4 style="margin:0;font-size:18px">MUHAMMAD AMAN</h4>
+          <p class="muted small" style="margin-top:6px">Designed & developed the website and system.</p>
+        </div>
+      </div>
+    </section>
+     <section class="card">
+  <h3>Contact Information</h3>
+  <p class="muted small">Reach out to the Founder or Developer for any queries regarding the Masjid Cleaning Program.</p>
+
+  <div style="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-top:16px">
+
+    <!-- Founder Contact -->
+    <div style="width:280px;background:#ffffff;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,0.05);padding:16px">
+      <h4 style="margin:0 0 6px;font-size:18px;color:#0b6b4f">Founder</h4>
+      <p class="muted small">Initiator of the Masjid Cleaning Movement</p>
+
+      <div style="margin-top:10px;line-height:1.6">
+        <strong>Name:</strong> <br>
+        <span class="muted small">MD RIZWAN</span><br><br>
+
+        <strong>Email:</strong> <br>
+        <span class="muted small">founder@example.com</span><br><br>
+
+        <strong>Phone:</strong> <br>
+        <span class="muted small">+91 XXXXX XXXXX</span><br><br>
+
+        <strong>Address:</strong> <br>
+        <span class="muted small">Gadwal, Telangana</span>
+      </div>
+    </div>
+    <!-- Admin Contact -->
+    <div style="width:280px;background:#ffffff;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,0.05);padding:16px">
+      <h4 style="margin:0 0 6px;font-size:18px;color:#0b6b4f">Admin</h4>
+      <p class="muted small">Admin of the Masjid Cleaning Movement</p>
+
+      <div style="margin-top:10px;line-height:1.6">
+        <strong>Name:</strong> <br>
+        <span class="muted small">MD RIZWAN</span><br><br>
+
+        <strong>Email:</strong> <br>
+        <span class="muted small">founder@example.com</span><br><br>
+
+        <strong>Phone:</strong> <br>
+        <span class="muted small">+91 XXXXX XXXXX</span><br><br>
+
+        <strong>Address:</strong> <br>
+        <span class="muted small">Gadwal, Telangana</span>
+      </div>
+    </div>
+
+    <!-- Developer Contact -->
+    <div style="width:280px;background:#ffffff;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,0.05);padding:16px">
+      <h4 style="margin:0 0 6px;font-size:18px;color:#0b6b4f">Developer</h4>
+      <p class="muted small">Website Designer & System Developer</p>
+
+      <div style="margin-top:10px;line-height:1.6">
+        <strong>Name:</strong> <br>
+        <span class="muted small">Muhammad Aman</span><br><br>
+
+        <strong>Email:</strong> <br>
+        <span class="muted small">aman905908@gmail.com</span><br><br>
+
+        <strong>Phone:</strong> <br>
+        <span class="muted small">+91 90590 89036</span><br><br>
+
+        <strong>Address:</strong> <br>
+        <span class="muted small">Gadwal, Telangana</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+  </main>
+
+  <footer>
+    <div class="insta" > Follow us on <a target="_blank" href="https://www.instagram.com/gadwal_masjid_cleaning_camp?igsh=MTZoNnR0YzlycHpsYw==">Instagram</a></div>
+    <div class="container muted">Built for community — © 2025•GMCC⁕All rights reserved</div>
+  </footer>
+
+  <!-- Admin Modal (hidden by default) -->
+  <div id="adminModal" class="modal" style="display:none">
+    <div class="card">
+      <h3>Admin Panel</h3>
+
+      <!-- LOGIN (username removed; only password input) -->
+      <div id="adminAuth">
+        <label for="adminPass" style="margin-top:8px">Admin password</label>
+        <input id="adminPass" type="password" placeholder="Enter admin password" />
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button id="authBtn">Log in</button>
+          <button id="cancelAuth" class="secondary">Cancel</button>
+        </div>
+        <div id="authMsg" class="muted small" style="margin-top:8px"></div>
+      </div>
+
+      <!-- PANEL (visible after login) -->
+      <div id="adminPanel" style="display:none;margin-top:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="muted">Manage volunteers, donations & explore images</div>
+          <div style="display:flex;gap:8px">
+            <button id="closeAdmin" class="secondary">Close</button>
+            <button id="logoutBtn" class="secondary">Logout</button>
+          </div>
+        </div>
+
+        <div class="admin-tabs">
+          <button id="tabVols" class="active">Volunteers</button>
+          <button id="tabDons">Donations</button>
+          <button id="tabExplore">Explore</button>
+        </div>
+
+        <div id="adminVolsWrap" style="margin-top:8px;overflow:auto;max-height:320px">
+          <table id="adminTable">
+            <thead><tr><th>Name</th><th>Contact</th><th>Availability</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div id="adminDonsWrap" style="display:none;margin-top:8px;overflow:auto;max-height:320px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div class="muted small">Saved donations</div>
+            <div style="display:flex;gap:8px">
+              <button id="wipeDonations" class="secondary">Wipe donations</button>
+            </div>
+          </div>
+          <table id="donationsTable">
+            <thead><tr><th>Donor</th><th>Amount</th><th>When</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div id="adminExploreWrap" style="display:none;margin-top:8px;max-height:420px;overflow:auto">
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+            <input id="exploreFile" type="file" accept="image/*" />
+            <button id="uploadExplore" type="button">Upload</button>
+            <button id="clearExplore" class="secondary" type="button">Wipe Explore Images</button>
+          </div>
+          <div class="muted small" style="margin-bottom:8px">Uploaded images will be stored on the server. For local dev, they may fall back to LocalStorage if server unreachable.</div>
+          <div class="explore-admin-list" id="exploreAdminList">
+          </div>
+        </div>
+
+        <!-- NEW: Admin online message editor -->
+        <div class="admin-online" id="adminOnlineEditor">
+          <label class="small">Update Online message (visible to visitors)</label>
+          <textarea id="adminOnlineInput" placeholder="Enter the message you want to show in the Online message box"></textarea>
+          <div class="btns">
+            <button id="saveOnlineMsg" type="button">Save</button>
+            <button id="clearOnlineMsg" type="button" class="secondary">Clear</button>
+          </div>
+          <div id="adminOnlineStatus" class="muted small" style="margin-top:8px"></div>
+        </div>
+
+        <div style="margin-top:12px" id="adminStatus"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- CONFIG ----------
+    // API root (assumes same origin). If your API is on another origin use that URL (e.g. https://api.example.com)
+    const API_ROOT = window.location.origin;
+
+    // Helper: get auth token (stored in sessionStorage)
+    function getToken(){ return sessionStorage.getItem('masjid_admin_jwt') || null; }
+    function setToken(t){ if(t) sessionStorage.setItem('masjid_admin_jwt', t); else sessionStorage.removeItem('masjid_admin_jwt'); }
+
+    // ---------- UTILS ----------
+    function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function fmtDate(iso){ try{ return new Date(iso).toLocaleString(); }catch(e){return iso;} }
+
+    // ---------- API wrappers (with graceful fallback) ----------
+    async function apiFetch(path, opts = {}) {
+      const url = API_ROOT + path;
+      // attach JWT if present and request is not for login/register
+      if(!opts.headers) opts.headers = {};
+      const token = getToken();
+      if(token) opts.headers['Authorization'] = 'Bearer ' + token;
+      try {
+        const res = await fetch(url, opts);
+        if(res.status === 401){ throw new Error('unauthorized'); }
+        if(!res.ok) {
+          const text = await res.text();
+          throw new Error('API error: ' + res.status + ' ' + text);
+        }
+        // If no content
+        if(res.status === 204) return null;
+        const ct = res.headers.get('content-type') || '';
+        if(ct.indexOf('application/json') !== -1) return await res.json();
+        return await res.text();
+      } catch (err) {
+        // rethrow to handle at callsite
+        throw err;
+      }
+    }
+
+    // Volunteers
+    async function loadVolunteers() {
+      // prefer locally saved volunteers first, then try server and merge
+      try {
+        const localRaw = localStorage.getItem('masjid_volunteers') || '[]';
+        const localList = JSON.parse(localRaw);
+        try {
+          const server = await apiFetch('/api/volunteers');
+          // merge server and local (local items may not have server ids)
+          const merged = Array.isArray(server) ? server.slice() : [];
+          // append local-only items that don't appear on server (by id or phone)
+          (localList || []).forEach(l => {
+            const exists = merged.some(s => (s._id && l._id && s._id === l._id) || (s.id && l.id && s.id === l.id) || (s.phone && l.phone && s.phone === l.phone));
+            if(!exists) merged.push(l);
+          });
+          return merged;
+        } catch(e){
+          // server failed — return local list if available
+          if(Array.isArray(localList) && localList.length>0) return localList;
+          console.warn('Could not load volunteers from API, falling back to demo data:', e);
+          return [{id:'d1',name:'Ahmed Khan',email:'ahmed@example.com',phone:'+919812345678',availability:'every',status:'member',notes:'Can bring gloves',created:new Date().toISOString()},
+                  {id:'d2',name:'Aman',email:'Aman@example.com',phone:'+919876543210',availability:'alternate',status:'pending',notes:'Can lead youth volunteers',created:new Date().toISOString()}];
+        }
+      } catch(err){
+        console.warn('Error reading local volunteers, using demo:', err);
+        return [{id:'d1',name:'Ahmed Khan',email:'ahmed@example.com',phone:'+919812345678',availability:'every',status:'member',notes:'Can bring gloves',created:new Date().toISOString()}];
+      }
+    }
+    async function submitVolunteer(v){
+      // ensure created timestamp and id
+      const toSave = Object.assign({}, v);
+      if(!toSave.created) toSave.created = new Date().toISOString();
+      if(!toSave.id) toSave.id = 'local_' + (Date.now().toString(36) + Math.random().toString(36).slice(2,6));
+
+      // save locally first (so it's visible immediately even if server is down)
+      try {
+        const raw = localStorage.getItem('masjid_volunteers') || '[]';
+        const arr = JSON.parse(raw);
+        arr.unshift(toSave);
+        localStorage.setItem('masjid_volunteers', JSON.stringify(arr));
+      } catch(e){ console.warn('Could not save volunteer locally:', e); }
+
+      // then try to send to server; if server fails, leave local copy and resolve
+      try {
+        const res = await apiFetch('/api/volunteers', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(v)});
+        // if server returns created entity, try to reconcile local store (replace local id with server id)
+        try {
+          if(res && (res._id || res.id)){
+            // replace local entry with server one
+            const raw = localStorage.getItem('masjid_volunteers') || '[]';
+            const arr = JSON.parse(raw);
+            const idx = arr.findIndex(x => x.id === toSave.id || x.phone === toSave.phone);
+            if(idx !== -1){ arr[idx] = res; localStorage.setItem('masjid_volunteers', JSON.stringify(arr)); }
+          }
+        } catch(e){ /* ignore reconciliation errors */ }
+        return res;
+      } catch(err){
+        // server failed, but we've already saved locally — return the local object so UI treats it as success
+        console.warn('submitVolunteer: server not available, saved locally. Error:', err);
+        return toSave;
+      }
+    }
+
+    // ---------- <--- CHANGED: LOCAL-ONLY ADMIN ACTIONS ---> ----------
+    // updateVolunteerStatus: update locally in localStorage (no network call)
+    async function updateVolunteerStatus(id, status){
+      try {
+        // read local list
+        const raw = localStorage.getItem('masjid_volunteers') || '[]';
+        const arr = JSON.parse(raw);
+
+        // try match by server _id, local id, or phone
+        let idx = arr.findIndex(x => x._id === id || x.id === id || (x.phone && x.phone === id));
+        if(idx === -1){
+          // additionally attempt matching by phone if id looks like a phone (e.g., started with + or digits)
+          idx = arr.findIndex(x => x.phone === id);
+        }
+
+        if(idx !== -1){
+          arr[idx].status = status;
+          arr[idx].updated = new Date().toISOString();
+          localStorage.setItem('masjid_volunteers', JSON.stringify(arr));
+          return arr[idx];
+        }
+
+        // nothing found locally; return null (we intentionally do NOT call server here)
+        return null;
+      } catch (e) {
+        throw e;
+      }
+    }
+
+    // deleteVolunteer: remove locally from localStorage (no network call)
+    async function deleteVolunteer(id){
+      try {
+        const raw = localStorage.getItem('masjid_volunteers') || '[]';
+        const arr = JSON.parse(raw);
+        const filtered = arr.filter(x => !(x._id === id || x.id === id || x.phone === id));
+        // Save filtered list
+        localStorage.setItem('masjid_volunteers', JSON.stringify(filtered));
+        return { success: true };
+      } catch(e){
+        throw e;
+      }
+    }
+    // ---------- </-- CHANGED SECTION --></>
+
+    // Donations
+    async function loadDonations(){
+      try { return await apiFetch('/api/donations'); }
+      catch(e){
+        console.warn('Donations API failed, fallback to demo:', e);
+        return [{id:'sd1',donor:'Ahmed',amount:500,created:new Date().toISOString()}];
+      }
+    }
+    async function submitDonation(d){
+      try { return await apiFetch('/api/donations', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(d)}); }
+      catch(e){ throw e; }
+    }
+    async function deleteDonationApi(id){
+      try { return await apiFetch('/api/donations/' + id, {method:'DELETE'}); }
+      catch(e){ throw e; }
+    }
+
+    // Explore images
+    async function loadExplore(){
+      try { return await apiFetch('/api/explore'); } catch(e){
+        console.warn('Explore API failed (using embedded images):', e);
+        return null; // caller will use embedded images
+      }
+    }
+    async function uploadExploreImage(file){
+      if(!getToken()) throw new Error('admin not logged in');
+      const fd = new FormData(); fd.append('image', file);
+      // use fetch directly to send FormData with Authorization header
+      const res = await fetch(API_ROOT + '/api/explore', { method:'POST', headers: { 'Authorization': 'Bearer ' + getToken() }, body: fd });
+      if(!res.ok) throw new Error('Upload failed: ' + res.statusText);
+      return await res.json();
+    }
+    async function deleteExploreImage(id){
+      try { return await apiFetch('/api/explore/' + id, {method:'DELETE'}); } catch(e){ throw e; }
+    }
+
+    // Admin login (LOCAL - no network)
+    async function adminLogin(username, password){
+      // Use the password provided by the user (set here). This replaces remote fetch.
+      const LOCAL_ADMIN_PASSWORD = 'admin@123';
+      // Only username 'admin' is accepted by the client UI
+      if(username !== 'admin') throw new Error('Invalid username');
+      if(password === LOCAL_ADMIN_PASSWORD){
+        // return a dummy token; sessionStorage will store it
+        return 'local-token-' + Math.random().toString(36).slice(2);
+      }
+      throw new Error('Login failed: incorrect password');
+    }
+
+    // ---------- UI rendering ----------
+    async function renderVolList(){
+      const list = await loadVolunteers();
+      const container = document.getElementById('volList');
+      if(!container) return;
+      if(!Array.isArray(list) || list.length===0){
+        container.innerHTML = '<div class="muted small">No volunteer requests yet.</div>';
+        return;
+      }
+      let html = '<table style="width:100%;border-collapse:collapse"><tbody>';
+      for(const it of list.slice(0,50)){
+        const tag = it.status === 'member' ? '<span class="tag">Member</span>' : '<span class="tag" style="background:#fff4e6;color:#92400e">Pending</span>';
+        html += `<tr>
+          <td style="width:1px">${tag}</td>
+          <td><strong>${escapeHtml(it.name)}</strong>
+              <div class="muted small">${escapeHtml(it.email||'')}${it.phone?(' • '+escapeHtml(it.phone)) : ''}</div>
+          </td>
+          <td class="muted small">${escapeHtml(it.availability||'')}</td>
+        </tr>`;
+      }
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    async function renderDonationsSummary(){
+      // try localStorage first, then server fallback
+      try {
+        const local = JSON.parse(localStorage.getItem('masjid_donations') || '[]');
+        if(Array.isArray(local) && local.length>0){
+          const total = local.reduce((s,it)=>s + (Number(it.amount)||0), 0);
+          document.getElementById('totalRaised').innerText = '₹' + total;
+          document.getElementById('donMsg').innerText = local.length + ' donation(s) saved (local)';
+          return;
+        }
+      } catch(e){ /* ignore parse errors */ }
+
+      const list = await loadDonations();
+      const total = (list || []).reduce((s,it)=>s + (Number(it.amount)||0), 0);
+      const totalEl = document.getElementById('totalRaised');
+      if(totalEl) totalEl.innerText = '₹' + total;
+      const msgEl = document.getElementById('donMsg');
+      if(msgEl) msgEl.innerText = (list && list.length) ? (list.length + ' donation(s) saved') : '';
+    }
+
+    // render admin tables (requires API or fallback)
+    async function renderAdminTable(){
+      const tbody = document.querySelector('#adminTable tbody');
+      tbody.innerHTML = '<tr><td colspan="4" class="muted">Loading...</td></tr>';
+      try {
+        const list = await loadVolunteers();
+        tbody.innerHTML = '';
+        if(!list || list.length===0){ tbody.innerHTML = '<tr><td colspan="4" class="muted">No requests</td></tr>'; return; }
+        list.forEach(it=>{
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${escapeHtml(it.name)}</td><td class="muted small">${escapeHtml(it.email||'')}<div>${escapeHtml(it.phone||'')}</div></td><td class="muted small">${escapeHtml(it.availability||'')}</td><td></td>`;
+          const actions = tr.querySelector('td:last-child');
+          const acceptBtn = document.createElement('button'); acceptBtn.textContent = it.status==='member'?'Revoke':'Accept'; acceptBtn.style.marginRight='6px';
+          acceptBtn.addEventListener('click', async ()=>{ try { await updateVolunteerStatus(it._id || it.id || it.phone, it.status==='member' ? 'pending' : 'member'); renderAdminTable(); renderVolList(); } catch(e){ alert('Action failed: '+e.message); } });
+          const delBtn = document.createElement('button'); delBtn.textContent='Delete'; delBtn.className='secondary';
+          delBtn.addEventListener('click', async ()=>{ if(!confirm('Delete this request?')) return; try{ await deleteVolunteer(it._id || it.id || it.phone); renderAdminTable(); renderVolList(); } catch(e){ alert('Delete failed: '+e.message);} });
+          actions.appendChild(acceptBtn); actions.appendChild(delBtn);
+          tbody.appendChild(tr);
+        });
+      } catch(e){
+        tbody.innerHTML = '<tr><td colspan="4" class="muted">Could not load volunteers: ' + escapeHtml(e.message) + '</td></tr>';
+      }
+    }
+
+    async function renderDonationsTable(){
+      const tbody = document.querySelector('#donationsTable tbody');
+      tbody.innerHTML = '<tr><td colspan="4" class="muted">Loading...</td></tr>';
+      try {
+        // prefer localStorage data
+        let list = [];
+        try { list = JSON.parse(localStorage.getItem('masjid_donations') || '[]'); } catch(e){ list = []; }
+        if(!list || list.length===0) list = await loadDonations();
+        tbody.innerHTML = '';
+        if(!list || list.length===0){ tbody.innerHTML = '<tr><td colspan="4" class="muted">No donations saved</td></tr>'; return; }
+        list.forEach(it=>{
+          const tr = document.createElement('tr');
+          const when = fmtDate(it.created);
+          tr.innerHTML = `<td>${escapeHtml(it.donor||'—')}</td><td>₹${escapeHtml(String(it.amount||''))}</td><td class="muted small">${escapeHtml(when)}</td><td></td>`;
+          const actions = tr.querySelector('td:last-child');
+          const delBtn = document.createElement('button'); delBtn.textContent='Delete'; delBtn.className='secondary';
+          delBtn.addEventListener('click', async ()=>{ if(!confirm('Delete this donation?')) return; try{ 
+            // delete from localStorage if present, else call API
+            let local = [];
+            try{ local = JSON.parse(localStorage.getItem('masjid_donations')||'[]'); }catch(e){ local = []; }
+            const idx = local.findIndex(x=>x.id === it.id || x.id === (it._id||it.id));
+            if(idx !== -1){ local.splice(idx,1); localStorage.setItem('masjid_donations', JSON.stringify(local)); renderDonationsTable(); renderDonationsSummary(); return; }
+            await deleteDonationApi(it._id || it.id);
+            renderDonationsTable(); renderDonationsSummary();
+          } catch(e){ alert('Delete failed: '+e.message); } });
+          actions.appendChild(delBtn);
+          tbody.appendChild(tr);
+        });
+      } catch(e){
+        tbody.innerHTML = '<tr><td colspan="4" class="muted">Could not load donations: ' + escapeHtml(e.message) + '</td></tr>';
+      }
+    }
+
+    // admin explore thumbnails
+    async function renderExploreAdminList(){
+      const container = document.getElementById('exploreAdminList');
+      container.innerHTML = 'Loading...';
+      try {
+        const list = await loadExplore();
+        container.innerHTML = '';
+        if(!list || list.length === 0) { container.innerHTML = '<div class="muted small">No uploaded images</div>'; return; }
+        list.forEach((it, idx) => {
+          const wrap = document.createElement('div'); wrap.className = 'explore-thumb';
+          const img = document.createElement('img'); img.src = it.url || it; img.alt = 'img'+(idx+1);
+          const delBtn = document.createElement('button'); delBtn.textContent = 'Delete';
+          delBtn.addEventListener('click', async ()=>{ if(!confirm('Delete this image?')) return; try{ await deleteExploreImage(it._id || it.id); renderExploreAdminList(); initExploreSlideshow(); } catch(e){ alert('Delete failed: '+e.message); }});
+          wrap.appendChild(img); wrap.appendChild(delBtn); container.appendChild(wrap);
+        });
+      } catch(e){
+        container.innerHTML = '<div class="muted small">Could not load explore images: ' + escapeHtml(e.message) + '</div>';
+      }
+    }
+
+    // ---------- Explore slideshow (uses server list if available) ----------
+    async function initExploreSlideshow(){
+      const root = document.getElementById('exploreSlideshow');
+      if(!root) return;
+      // try to fetch server images
+      let serverList = null;
+      try { serverList = await loadExplore(); } catch(e){ serverList = null; }
+      // if serverList is an array with objects containing url, replace slides
+      if(Array.isArray(serverList) && serverList.length>0){
+        root.innerHTML = '';
+        serverList.forEach((it)=> {
+          const img = document.createElement('img');
+          img.src = it.url || it;
+          img.alt = 'Work';
+          img.loading = 'lazy';
+          root.appendChild(img);
+        });
+        const dotsWrap = document.createElement('div'); dotsWrap.className='dots'; dotsWrap.id='exploreDots';
+        root.appendChild(dotsWrap);
+      } else {
+        // keep the embedded images and ensure dots exist
+        if(!document.getElementById('exploreDots')) {
+          const dotsWrap = document.createElement('div'); dotsWrap.className='dots'; dotsWrap.id='exploreDots';
+          root.appendChild(dotsWrap);
+        }
+      }
+
+      // initialize slideshow behavior
+      const imgs = Array.from(root.querySelectorAll('img'));
+      const dotsWrap = document.getElementById('exploreDots');
+      let current = 0, interval = null;
+      const INTERVAL_MS = 3000;
+      dotsWrap.innerHTML = '';
+      imgs.forEach((img,i)=>{
+        const d = document.createElement('button'); d.className='dot'; d.setAttribute('aria-label','Show image '+(i+1));
+        d.addEventListener('click', ()=>{ show(i); resetTimer(); });
+        dotsWrap.appendChild(d);
+      });
+      function show(i){ imgs.forEach((im,idx)=> im.classList.toggle('active', idx===i)); Array.from(dotsWrap.children).forEach((dot,idx)=> dot.classList.toggle('active', idx===i)); current = i; }
+      function next(){ if(imgs.length===0) return; show((current+1) % imgs.length); }
+      function startTimer(){ if(interval) return; interval = setInterval(next, INTERVAL_MS); }
+      function stopTimer(){ if(interval){ clearInterval(interval); interval = null; } }
+      function resetTimer(){ stopTimer(); startTimer(); }
+      show(0); startTimer();
+      root.addEventListener('mouseenter', stopTimer); root.addEventListener('mouseleave', startTimer);
+      root.addEventListener('focusin', stopTimer); root.addEventListener('focusout', startTimer);
+      root.addEventListener('keydown', (e)=>{ if(e.key === 'ArrowRight'){ resetTimer(); next(); } if(e.key === 'ArrowLeft'){ resetTimer(); show((current-1+imgs.length)%imgs.length); } });
+    }
+
+    // ---------- Form handlers ----------
+    document.getElementById('joinForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      if(!name){ alert('Please enter your name'); return; }
+      if(!phone){ alert('Please enter your mobile number'); return; }
+      const phoneRegex = /^(\\+91[\\-\\s]?)?[6-9][0-9]{9}$/;
+      if(!phoneRegex.test(phone)){ alert('Please enter a valid Indian mobile number (10 digits). Example: +919812345678 or 9812345678'); return; }
+
+      const obj = {
+        name, phone,
+        email: document.getElementById('email').value.trim(),
+        age: document.getElementById('age').value.trim(),
+        availability: document.getElementById('availability').value,
+        notes: document.getElementById('notes').value.trim()
+      };
+
+      try {
+        // submitVolunteer now stores locally first and then attempts server submission
+        await submitVolunteer(obj);
+        this.reset();
+        document.getElementById('success').style.display='block';
+        setTimeout(()=>document.getElementById('success').style.display='none',3500);
+        await renderVolList();
+        await renderAdminTable();
+      } catch (err) {
+        // if API fails, show helpful message — but since submitVolunteer writes locally, still show success
+        console.warn('Could not send request to server, saved locally:', err);
+        this.reset();
+        document.getElementById('success').style.display='block';
+        setTimeout(()=>document.getElementById('success').style.display='none',3500);
+        await renderVolList();
+        await renderAdminTable();
+      }
+    });
+    document.getElementById('clearBtn').addEventListener('click', ()=>document.getElementById('joinForm').reset());
+
+    // Donate flow: pick amount buttons
+    document.querySelectorAll('.donAmt').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ document.getElementById('customAmount').value = btn.innerText.replace(/[^0-9]/g,''); });
+    });
+
+    // ---------- REPLACED DONATE HANDLER (random image instead of QR) ----------
+    document.getElementById('donateBtn').addEventListener('click', async () => {
+      // read and validate amount
+      const amtStr = (document.getElementById('customAmount').value || '').trim();
+      const amt = Number(amtStr);
+      if(!amt || amt <= 0){ alert('Enter a valid donation amount.'); return; }
+
+      // ask donor name now (optional, kept same UX)
+      const donorName = prompt('Enter your name (optional)') || '';
+
+      // generate a short random token for the image seed (visual only)
+      const token = 'don_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+
+      // Use your saved image (path provided) instead of a random picsum image
+      // developer-provided local path is used here; your environment/tooling can convert it to a URL.
+      const imgUrl = 'sampleqr.jpeg';
+
+      // create modal DOM (kept inside page, no new window)
+      const overlay = document.createElement('div');
+      overlay.className = 'qr-modal-overlay';
+      overlay.innerHTML = `
+        <div class="qr-modal" role="dialog" aria-modal="true" aria-label="Donation Image">
+          <h4>Donation Image</h4>
+          <img src="${imgUrl}" alt="Donation image" />
+          <div style="font-size:13px;color:#374151;margin-top:8px">Amount: ₹${amt}</div>
+          <div class="qr-actions">
+            <button class="done">Done</button>
+            <button class="cancel">Cancel</button>
+          </div>
+        </div>
+      `;
+
+      // append overlay
+      document.body.appendChild(overlay);
+
+      // safe redirect to home (handles file:// and http(s) gracefully)
+      function goHome() {
+        try {
+          if (location.protocol === 'file:') {
+            // if opened from file://, navigate to same file (avoid showing directory listing)
+            const currentFile = location.pathname.split('/').pop();
+            if (currentFile) window.location.href = currentFile;
+            else window.location.reload();
+          } else {
+            // hosted site: go to root
+            window.location.href = '/';
+          }
+        } catch (e) {
+          // fallback reload
+          window.location.reload();
+        }
+      }
+
+      // DONE: save donation to localStorage (no network) then redirect
+      overlay.querySelector('button.done').addEventListener('click', () => {
+        try {
+          const donationsRaw = localStorage.getItem('masjid_donations');
+          const donations = donationsRaw ? JSON.parse(donationsRaw) : [];
+          const donation = {
+            id: 'local_' + (Date.now().toString(36) + Math.random().toString(36).slice(2,6)),
+            donor: donorName || 'Anonymous',
+            amount: amt,
+            method: 'image',
+            image: imgUrl,
+            created: new Date().toISOString()
+          };
+          donations.push(donation);
+          localStorage.setItem('masjid_donations', JSON.stringify(donations));
+
+          // Update on-page summary/tables (best-effort; functions exist in your script)
+          try { renderDonationsSummary(); renderDonationsTable(); } catch(e){ /* ignore if not available */ }
+
+          // remove modal then redirect
+          document.body.removeChild(overlay);
+
+          // optional quick thank-you
+          alert('Thank you! Donation recorded locally.');
+
+        } catch (err) {
+          // if something goes wrong with storage, still remove the modal and redirect
+          try { document.body.removeChild(overlay); } catch(e){}
+          alert('Could not save donation locally: ' + (err && err.message ? err.message : err));
+        } finally {
+          goHome();
+        }
+      });
+
+      // CANCEL: close modal and go home (no save)
+      overlay.querySelector('button.cancel').addEventListener('click', () => {
+        try { document.body.removeChild(overlay); } catch(e){}
+        goHome();
+      });
+    });
+
+    // export donations CSV (client-side CSV generation)
+    document.getElementById('donExport').addEventListener('click', async ()=>{
+      try {
+        // prefer localStorage
+        let list = [];
+        try { list = JSON.parse(localStorage.getItem('masjid_donations')||'[]'); } catch(e){ list = []; }
+        if(!list || list.length===0) list = await loadDonations();
+        if(!list || list.length===0){ alert('No donations to export'); return; }
+        const rows = [['Donor','Amount','Created']];
+        for(const r of list) rows.push([r.donor||'', r.amount||'', r.created||'']);
+        const csv = rows.map(r => r.map(cell => `"${(cell+'').replace(/"/g,'""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], {type:'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'masjid_donations.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      } catch(e){ alert('Export failed: '+e.message); }
+    });
+
+    // export volunteers CSV
+    document.getElementById('exportCsv').addEventListener('click', async ()=>{
+      try {
+        const list = await loadVolunteers();
+        if(!list || list.length===0){ alert('No data to export'); return; }
+        const rows = [['Name','Email','Phone','Availability','Status','Notes','Created']];
+        for(const r of list) rows.push([r.name||'', r.email||'', r.phone||'', r.availability||'', r.status||'', r.notes||'', r.created||'']);
+        const csv = rows.map(r => r.map(cell => `"${(cell+'').replace(/"/g,'""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], {type:'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'masjid_volunteers.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      } catch(e){ alert('Export failed: '+e.message); }
+    });
+
+    // mailto organizer
+    document.getElementById('mailtoAll').addEventListener('click', async ()=>{
+      const organizerEmail = "aman9059089036@gmail.com";
+      const subject = "Masjid Cleaning Program — Update";
+      const body = "Assalamu alaikum,%0D%0A%0D%0AThis is an update regarding the masjid cleaning program.%0D%0A%0D%0ARegards";
+      const mailtoUrl = `mailto:${encodeURIComponent(organizerEmail)}?subject=${encodeURIComponent(subject)}&body=${body}`;
+      try {
+        const win = window.open(mailtoUrl, '_blank');
+        if(!win) window.location.href = mailtoUrl;
+      } catch(e){
+        try { await navigator.clipboard.writeText(organizerEmail); alert("Couldn't open your mail client. Organizer email copied to clipboard: " + organizerEmail); }
+        catch(err){ prompt("Couldn't open mail client. Please copy the organizer email:", organizerEmail); }
+      }
+    });
+
+    // ---------- Admin modal + auth ----------
+    const adminModal = document.getElementById('adminModal');
+    document.getElementById('adminBtn').addEventListener('click', ()=>{ 
+      adminModal.style.display='flex'; 
+      document.getElementById('adminPass').value=''; 
+      document.getElementById('adminAuth').style.display='block'; 
+      document.getElementById('adminPanel').style.display='none'; 
+      document.getElementById('authMsg').innerText=''; 
+    });
+
+    document.getElementById('cancelAuth').addEventListener('click', ()=>adminModal.style.display='none');
+    document.getElementById('closeAdmin').addEventListener('click', ()=>adminModal.style.display='none');
+
+    // Use fixed username 'admin' in client; only password is requested
+    document.getElementById('authBtn').addEventListener('click', async ()=>{
+      const fixedUsername = 'admin';
+      const p = document.getElementById('adminPass').value;
+      if(!p){ document.getElementById('authMsg').innerText = 'Enter the admin password'; return; }
+      document.getElementById('authMsg').innerText = 'Logging in...';
+      try {
+        const token = await adminLogin(fixedUsername,p);
+        setToken(token);
+        document.getElementById('adminAuth').style.display='none';
+        document.getElementById('adminPanel').style.display='block';
+        document.getElementById('authMsg').innerText = '';
+        document.getElementById('adminStatus').innerText = 'Logged in as ' + fixedUsername;
+        // load admin views
+        await renderAdminTable();
+        await renderDonationsTable();
+        await renderExploreAdminList();
+
+        // populate admin online input with current message (if any)
+        try {
+          const existing = localStorage.getItem('masjid_online_msg') || '';
+          document.getElementById('adminOnlineInput').value = existing;
+          document.getElementById('adminOnlineStatus').innerText = existing ? 'Current message loaded.' : 'No message set.';
+        } catch(e){}
+
+      } catch(err){
+        document.getElementById('authMsg').innerText = 'Login failed: ' + (err.message||err);
+        setToken(null);
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', ()=>{
+      setToken(null);
+      document.getElementById('adminPanel').style.display='none';
+      document.getElementById('adminAuth').style.display='block';
+      document.getElementById('authMsg').innerText = 'Logged out';
+    });
+
+    // admin tabs
+    document.getElementById('tabVols').addEventListener('click', ()=>{
+      document.getElementById('tabVols').classList.add('active'); document.getElementById('tabDons').classList.remove('active'); document.getElementById('tabExplore').classList.remove('active');
+      document.getElementById('adminVolsWrap').style.display=''; document.getElementById('adminDonsWrap').style.display='none'; document.getElementById('adminExploreWrap').style.display='none';
+      renderAdminTable();
+    });
+    document.getElementById('tabDons').addEventListener('click', ()=>{
+      document.getElementById('tabDons').classList.add('active'); document.getElementById('tabVols').classList.remove('active'); document.getElementById('tabExplore').classList.remove('active');
+      document.getElementById('adminVolsWrap').style.display='none'; document.getElementById('adminDonsWrap').style.display=''; document.getElementById('adminExploreWrap').style.display='none';
+      renderDonationsTable();
+    });
+    document.getElementById('tabExplore').addEventListener('click', ()=>{
+      document.getElementById('tabExplore').classList.add('active'); document.getElementById('tabVols').classList.remove('active'); document.getElementById('tabDons').classList.remove('active');
+      document.getElementById('adminVolsWrap').style.display='none'; document.getElementById('adminDonsWrap').style.display='none'; document.getElementById('adminExploreWrap').style.display='';
+      renderExploreAdminList();
+    });
+
+    // upload explore image
+    document.getElementById('uploadExplore').addEventListener('click', async ()=>{
+      const input = document.getElementById('exploreFile');
+      if(!input || !input.files || input.files.length===0){ alert('Pick an image file first'); return; }
+      const file = input.files[0];
+      if(!file.type.startsWith('image/')){ alert('Only image files are allowed'); return; }
+      try {
+        await uploadExploreImage(file);
+        input.value = '';
+        await renderExploreAdminList();
+        await initExploreSlideshow();
+        alert('Uploaded');
+      } catch(e){ alert('Upload failed: ' + e.message); }
+    });
+
+    document.getElementById('clearExplore').addEventListener('click', async ()=>{
+      if(!confirm('Wipe all explore images on server?')) return;
+      try {
+        const list = await loadExplore();
+        if(Array.isArray(list)){
+          for(const it of list) {
+            try { await deleteExploreImage(it._id || it.id); } catch(e){ console.warn('could not delete', it, e); }
+          }
+        }
+        await renderExploreAdminList(); initExploreSlideshow();
+      } catch(e){ alert('Failed to wipe images: ' + e.message); }
+    });
+
+    // save / clear online message (admin controls)
+    document.getElementById('saveOnlineMsg').addEventListener('click', ()=> {
+      try {
+        const val = document.getElementById('adminOnlineInput').value || '';
+        localStorage.setItem('masjid_online_msg', val);
+        // update visitor box
+        const visitorBox = document.getElementById('onlineMsg');
+        if(visitorBox) visitorBox.value = val;
+        document.getElementById('adminOnlineStatus').innerText = 'Saved.';
+      } catch(e){
+        document.getElementById('adminOnlineStatus').innerText = 'Save failed: ' + (e && e.message ? e.message : e);
+      }
+    });
+    document.getElementById('clearOnlineMsg').addEventListener('click', ()=> {
+      if(!confirm('Clear the online message?')) return;
+      try {
+        localStorage.removeItem('masjid_online_msg');
+        document.getElementById('adminOnlineInput').value = '';
+        const visitorBox = document.getElementById('onlineMsg');
+        if(visitorBox) visitorBox.value = '';
+        document.getElementById('adminOnlineStatus').innerText = 'Cleared.';
+      } catch(e){
+        document.getElementById('adminOnlineStatus').innerText = 'Clear failed: ' + (e && e.message ? e.message : e);
+      }
+    });
+
+    document.getElementById('clearOnlineMsg').classList.add('secondary');
+
+    // wipe donations
+    document.getElementById('wipeDonations').addEventListener('click', async ()=>{
+      if(!confirm('Wipe ALL donations? This cannot be undone.')) return;
+      try {
+        const list = await loadDonations();
+        for(const d of list) {
+          try { await deleteDonationApi(d._id || d.id); } catch(e){ console.warn('delete donation failed', e); }
+        }
+        await renderDonationsTable();
+        await renderDonationsSummary();
+      } catch(e){ alert('Failed: '+e.message); }
+    });
+
+    // ---------- small header slideshow (existing) ----------
+    (function(){
+      const root = document.getElementById('masjidSlideshow');
+      if(!root) return;
+      const imgs = Array.from(root.querySelectorAll('img'));
+      const dotsWrap = document.getElementById('slideshowDots');
+      let current = 0;
+      let interval = null;
+      const INTERVAL_MS = 4000;
+      imgs.forEach((img,i)=>{
+        const d = document.createElement('button'); d.className='dot'; d.setAttribute('aria-label','Show image '+(i+1));
+        d.addEventListener('click', ()=>{ show(i); resetTimer(); });
+        dotsWrap.appendChild(d);
+      });
+      function show(i){ imgs.forEach((im,idx)=> im.classList.toggle('active', idx===i)); Array.from(dotsWrap.children).forEach((dot,idx)=> dot.classList.toggle('active', idx===i)); current = i; }
+      function next(){ show((current+1) % imgs.length); }
+      function startTimer(){ if(interval) return; interval = setInterval(next, INTERVAL_MS); }
+      function stopTimer(){ if(interval){ clearInterval(interval); interval = null; } }
+      function resetTimer(){ stopTimer(); startTimer(); }
+      show(0); startTimer();
+      root.addEventListener('mouseenter', stopTimer);
+      root.addEventListener('mouseleave', startTimer);
+      root.addEventListener('focusin', stopTimer);
+      root.addEventListener('focusout', startTimer);
+      root.addEventListener('keydown', (e)=>{ if(e.key === 'ArrowRight') { resetTimer(); next(); } if(e.key === 'ArrowLeft') { resetTimer(); show((current-1+imgs.length)%imgs.length); } });
+    })();
+
+    // ---------- initialization ----------
+    (async function init(){
+      await renderVolList();
+      await renderDonationsSummary();
+      await initExploreSlideshow();
+
+      // load online message for visitors
+      try {
+        const msg = localStorage.getItem('masjid_online_msg') || '';
+        const visitorBox = document.getElementById('onlineMsg');
+        if(visitorBox) visitorBox.value = msg;
+      } catch(e){ /* ignore */ }
+
+      // if admin token present, show admin panel automatically (optional)
+      if(getToken()){
+        document.getElementById('adminAuth').style.display='none';
+        document.getElementById('adminPanel').style.display='block';
+        document.getElementById('adminStatus').innerText = 'Logged in';
+        await renderAdminTable();
+        await renderDonationsTable();
+        await renderExploreAdminList();
+
+        // populate admin online input with current message (if any)
+        try {
+          const existing = localStorage.getItem('masjid_online_msg') || '';
+          document.getElementById('adminOnlineInput').value = existing;
+          document.getElementById('adminOnlineStatus').innerText = existing ? 'Current message loaded.' : 'No message set.';
+        } catch(e){}
+      }
+    })();
+
+  </script>
+  
+   
+</body>
+</html>
