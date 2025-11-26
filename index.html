@@ -123,12 +123,12 @@
     }
   </style>
 
-  <!-- (still present) Firebase SDKs – not used for Explore now -->
+  <!-- Firebase SDKs (not used now for Explore, safe to keep) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
-  <!-- Supabase JS (for Explore images) -->
+  <!-- Supabase JS (for Explore images + Online message) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
@@ -394,7 +394,7 @@
     <div class="container muted">Built for community — © 2025•GMCC⁕All rights reserved</div>
   </footer>
 
-  <!-- Admin Modal (hidden by default) -->
+  <!-- Admin Modal -->
   <div id="adminModal" class="modal" style="display:none">
     <div class="card">
       <h3>Admin Panel</h3>
@@ -477,21 +477,56 @@
      
 
   <script>
-    // NOTE: If you see "new row violates row-level security policy"
-    // you MUST create a Storage policy in Supabase (bucket "explore")
-    // allowing INSERT & SELECT for role "anon". This cannot be fixed
-    // from this HTML file alone.
-
-    // ---------- SUPABASE CONFIG (Explore images only) ----------
+    // ---------- SUPABASE CONFIG ----------
     const SUPABASE_URL = "https://exbzojdbxlxjxklkdbxz.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4YnpvamRieGx4anhrbGtkYnh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNDM4MDMsImV4cCI6MjA3OTcxOTgwM30.6pM8kZPzp5uAtMgfg6n-0565EDi6piAt3S6W5B_sOI8";
     const SUPABASE_BUCKET = "explore";
+    const SUPABASE_ONLINE_TABLE = "online_messages"; // table for shared Online message (id=1)
 
     let sb = null;
     if (typeof supabase !== "undefined" && SUPABASE_URL && SUPABASE_ANON_KEY) {
       sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     } else {
       console.warn("Supabase client not initialised");
+    }
+
+    // ---------- SHARED ONLINE MESSAGE HELPERS ----------
+    async function fetchOnlineMessage() {
+      if (!sb) return "";
+      try {
+        const { data, error } = await sb
+          .from(SUPABASE_ONLINE_TABLE)
+          .select("message")
+          .eq("id", 1)
+          .maybeSingle();
+
+        if (error) {
+          console.warn("Online message fetch error:", error);
+          return "";
+        }
+        return (data && data.message) || "";
+      } catch (e) {
+        console.warn("Online message fetch failed:", e);
+        return "";
+      }
+    }
+
+    async function saveOnlineMessageToServer(text) {
+      if (!sb) throw new Error("Supabase client not ready for online message");
+      const { error } = await sb
+        .from(SUPABASE_ONLINE_TABLE)
+        .upsert({ id: 1, message: text, updated_at: new Date().toISOString() });
+      if (error) throw error;
+    }
+
+    async function syncOnlineMessageUI() {
+      const msg = await fetchOnlineMessage();
+      const visitorBox = document.getElementById("onlineMsg");
+      const adminBox = document.getElementById("adminOnlineInput");
+      if (visitorBox) visitorBox.value = msg;
+      if (adminBox) adminBox.value = msg;
+      const status = document.getElementById("adminOnlineStatus");
+      if (status) status.innerText = msg ? "Current message loaded." : "No message set.";
     }
 
     // ---------- KEYS / AUTH HELPERS (LOCAL ONLY) ----------
@@ -925,7 +960,7 @@
 
     document.getElementById('clearBtn').addEventListener('click', ()=>document.getElementById('joinForm').reset());
 
-    // Donate flow: pick amount buttons
+    // Donate amount buttons
     document.querySelectorAll('.donAmt').forEach(btn=>{
       btn.addEventListener('click', ()=>{ document.getElementById('customAmount').value = btn.innerText.replace(/[^0-9]/g,''); });
     });
@@ -1024,7 +1059,7 @@
         const rows = [['Name','Email','Phone','Availability','Status','Notes','Created']];
         for(const r of list) rows.push([r.name||'', r.email||'', r.phone||'', r.availability||'', r.status||'', r.notes||'', r.created||'']);
         const csv = rows.map(r => r.map(cell => `"${(cell+'').replace(/"/g,'""')}"`).join(',')).join('\n');
-        const blob = new Blob([csv], {type:'text/csv'});
+        const blob = new Blob([csv], {type:'text/cv'});
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a'); a.href = url; a.download = 'masjid_volunteers.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
       } catch(e){ alert('Export failed: '+e.message); }
@@ -1073,12 +1108,7 @@
         await renderAdminTable();
         await renderDonationsTable();
         await renderExploreAdminList();
-
-        try {
-          const existing = localStorage.getItem('masjid_online_msg') || '';
-          document.getElementById('adminOnlineInput').value = existing;
-          document.getElementById('adminOnlineStatus').innerText = existing ? 'Current message loaded.' : 'No message set.';
-        } catch(e){}
+        await syncOnlineMessageUI();
       } catch(err){
         document.getElementById('authMsg').innerText = 'Login failed: ' + (err.message||err);
         setToken(null);
@@ -1149,28 +1179,31 @@
       } catch(e){ alert('Failed: ' + e.message); }
     });
 
-    // save / clear online message (admin controls)
-    document.getElementById('saveOnlineMsg').addEventListener('click', ()=> {
+    // save / clear online message (admin controls) -> Supabase
+    document.getElementById('saveOnlineMsg').addEventListener('click', async ()=> {
+      const statusEl = document.getElementById('adminOnlineStatus');
       try {
         const val = document.getElementById('adminOnlineInput').value || '';
-        localStorage.setItem('masjid_online_msg', val);
+        await saveOnlineMessageToServer(val);
         const visitorBox = document.getElementById('onlineMsg');
         if(visitorBox) visitorBox.value = val;
-        document.getElementById('adminOnlineStatus').innerText = 'Saved.';
+        if(statusEl) statusEl.innerText = 'Saved online.';
       } catch(e){
-        document.getElementById('adminOnlineStatus').innerText = 'Save failed: ' + (e && e.message ? e.message : e);
+        if(statusEl) statusEl.innerText = 'Save failed: ' + (e && e.message ? e.message : e);
       }
     });
-    document.getElementById('clearOnlineMsg').addEventListener('click', ()=> {
+
+    document.getElementById('clearOnlineMsg').addEventListener('click', async ()=> {
+      const statusEl = document.getElementById('adminOnlineStatus');
       if(!confirm('Clear the online message?')) return;
       try {
-        localStorage.removeItem('masjid_online_msg');
+        await saveOnlineMessageToServer('');
         document.getElementById('adminOnlineInput').value = '';
         const visitorBox = document.getElementById('onlineMsg');
         if(visitorBox) visitorBox.value = '';
-        document.getElementById('adminOnlineStatus').innerText = 'Cleared.';
+        if(statusEl) statusEl.innerText = 'Cleared.';
       } catch(e){
-        document.getElementById('adminOnlineStatus').innerText = 'Clear failed: ' + (e && e.message ? e.message : e);
+        if(statusEl) statusEl.innerText = 'Clear failed: ' + (e && e.message ? e.message : e);
       }
     });
 
@@ -1224,11 +1257,8 @@
       await renderDonationsSummary();
       await initExploreSlideshow();
 
-      try {
-        const msg = localStorage.getItem('masjid_online_msg') || '';
-        const visitorBox = document.getElementById('onlineMsg');
-        if(visitorBox) visitorBox.value = msg;
-      } catch(e){}
+      // Load shared Online message for all visitors
+      await syncOnlineMessageUI();
 
       if(getToken()){
         document.getElementById('adminAuth').style.display='none';
@@ -1237,12 +1267,7 @@
         await renderAdminTable();
         await renderDonationsTable();
         await renderExploreAdminList();
-
-        try {
-          const existing = localStorage.getItem('masjid_online_msg') || '';
-          document.getElementById('adminOnlineInput').value = existing;
-          document.getElementById('adminOnlineStatus').innerText = existing ? 'Current message loaded.' : 'No message set.';
-        } catch(e){}
+        // Online message already synced above
       }
     })();
   </script>
