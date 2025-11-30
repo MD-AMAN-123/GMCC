@@ -21,6 +21,7 @@
     h1{margin:0 0 6px;font-size:26px}
     p.lead{margin:0;color:rgba(0,0,0,0.65)} 
 
+    
     .card{  background:white;padding:16px;
   border-radius: 12px; box-shadow:0 6px 18px rgba(11,107,79,0.06);margin-bottom:16px}
     .grid{display:grid;gap:14px}
@@ -111,7 +112,7 @@
     .explore-thumb img{width:100%;height:100%;object-fit:cover}
     .explore-thumb button{position:absolute;right:6px;top:6px;background:rgba(0,0,0,0.6);color:white;border:0;border-radius:6px;padding:4px 6px;cursor:pointer;font-size:12px}
 
-    /* QR modal styles (added for donate flow) */
+    /* QR modal styles (kept, but not used after redirect change) */
     .qr-modal-overlay{ position: fixed; inset: 0; background: rgba(2,6,23,0.6); display:flex; align-items:center; justify-content:center; z-index:80; }
     .qr-modal { background: white; padding: 18px; border-radius: 12px; width: 360px; max-width:92vw; box-shadow: 0 8px 30px rgba(3,10,10,0.2); text-align:center; }
     .qr-modal h4{ margin: 0 0 10px; color: #0b6b4f; }
@@ -137,7 +138,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
-  <!-- Supabase JS (for Explore images + Online message) -->
+  <!-- Supabase JS (for Explore images + Online message + Donations) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
@@ -422,7 +423,7 @@
       <!-- PANEL (visible after login) -->
       <div id="adminPanel" style="display:none;margin-top:8px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div class="muted">Manage volunteers & donations (local) and Explore images (shared online)</div>
+          <div class="muted">Manage volunteers & donations (Supabase) and Explore images (shared online)</div>
           <div style="display:flex;gap:8px">
             <button id="closeAdmin" class="secondary">Close</button>
             <button id="logoutBtn" class="secondary">Logout</button>
@@ -442,10 +443,24 @@
           </table>
         </div>
 
-        <div id="adminDonsWrap" style="display:none;margin-top:8px;overflow:auto;max-height:320px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <div class="muted small">Saved donations</div>
-            <div style="display:flex;gap:8px">
+        <div id="adminDonsWrap" style="display:none;margin-top:8px;overflow:auto;max-height:420px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:10px">
+            <div>
+              <div class="muted small">Saved donations (Supabase)</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+                <input id="donSearch" type="text" placeholder="Search name" style="padding:6px 8px;font-size:12px;border-radius:8px;border:1px solid #e5e7eb;min-width:140px;">
+                <select id="donMonthFilter" style="padding:6px 8px;font-size:12px;border-radius:8px;border:1px solid #e5e7eb;">
+                  <option value="">All months</option>
+                </select>
+                <select id="donSort" style="padding:6px 8px;font-size:12px;border-radius:8px;border:1px solid #e5e7eb;">
+                  <option value="latest">Sort: Latest</option>
+                  <option value="oldest">Sort: Oldest</option>
+                  <option value="amount-high">Amount: High → Low</option>
+                  <option value="amount-low">Amount: Low → High</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0">
               <button id="wipeDonations" class="secondary">Wipe donations</button>
             </div>
           </div>
@@ -453,6 +468,10 @@
             <thead><tr><th>Donor</th><th>Amount</th><th>When</th><th>Actions</th></tr></thead>
             <tbody></tbody>
           </table>
+          <div style="margin-top:10px;">
+            <canvas id="donationsChart" height="220" style="width:100%;max-height:230px;"></canvas>
+            <div class="muted small" style="margin-top:4px;">Chart shows total donation amount per day (after applying filters).</div>
+          </div>
         </div>
 
         <div id="adminExploreWrap" style="display:none;margin-top:8px;max-height:420px;overflow:auto">
@@ -490,7 +509,8 @@
     const SUPABASE_URL = "https://exbzojdbxlxjxklkdbxz.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4YnpvamRieGx4anhrbGtkYnh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNDM4MDMsImV4cCI6MjA3OTcxOTgwM30.6pM8kZPzp5uAtMgfg6n-0565EDi6piAt3S6W5B_sOI8";
     const SUPABASE_BUCKET = "explore";
-    const SUPABASE_ONLINE_TABLE = "online_messages"; // table for shared Online message (id=1)
+    const SUPABASE_ONLINE_TABLE = "online_messages";
+    const SUPABASE_DON_TABLE = "donations"; // table storing online donations
 
     let sb = null;
     if (typeof supabase !== "undefined" && SUPABASE_URL && SUPABASE_ANON_KEY) {
@@ -498,6 +518,9 @@
     } else {
       console.warn("Supabase client not initialised");
     }
+
+    // cache for donations (for filters + chart)
+    let donationsCache = [];
 
     // ---------- SHARED ONLINE MESSAGE HELPERS ----------
     async function fetchOnlineMessage() {
@@ -538,9 +561,8 @@
       if (status) status.innerText = msg ? "Current message loaded." : "No message set.";
     }
 
-    // ---------- KEYS / AUTH HELPERS (LOCAL ONLY) ----------
-    const VOL_KEY  = 'masjid_volunteers';
-    const DON_KEY  = 'masjid_donations';
+    // ---------- KEYS / AUTH HELPERS ----------
+    const VOL_KEY  = 'masjid_volunteers'; // volunteers still local
 
     function getToken(){ return sessionStorage.getItem('masjid_admin_jwt') || null; }
     function setToken(t){ if(t) sessionStorage.setItem('masjid_admin_jwt', t); else sessionStorage.removeItem('masjid_admin_jwt'); }
@@ -611,67 +633,266 @@
       }
     }
 
-    // ---------- DONATIONS (LOCALSTORAGE ONLY) ----------
+    // ---------- DONATIONS (SUPABASE) ----------
     async function loadDonations(){
-      try{
-        const raw = localStorage.getItem(DON_KEY);
-        const list = raw ? JSON.parse(raw) : [];
-        if(Array.isArray(list)) return list;
-        return [];
-      }catch(e){
-        console.warn('Error reading donations:', e);
-        return [];
-      }
-    }
-
-    async function saveDonations(list){
-      try{ localStorage.setItem(DON_KEY, JSON.stringify(list)); }catch(e){ console.warn('Could not save donations:', e); }
+      if(!sb) throw new Error("Supabase client not ready for donations");
+      const { data, error } = await sb
+        .from(SUPABASE_DON_TABLE)
+        .select("id,name,amount,screenshot_url,created_at")
+        .order("created_at", { ascending:false });
+      if(error) throw error;
+      donationsCache = data || [];
+      return donationsCache;
     }
 
     async function renderDonationsSummary(){
-      const list = await loadDonations();
-      const total = (list || []).reduce((s,it)=>s + (Number(it.amount)||0), 0);
       const totalEl = document.getElementById('totalRaised');
-      if(totalEl) totalEl.innerText = '₹' + total;
       const msgEl = document.getElementById('donMsg');
-      if(msgEl) msgEl.innerText = (list && list.length) ? (list.length + ' donation(s) saved (local)') : '';
-    }
-
-    async function renderDonationsTable(){
-      const tbody = document.querySelector('#donationsTable tbody');
-      tbody.innerHTML = '<tr><td colspan="4" class="muted">Loading...</td></tr>';
+      if(!sb){
+        if(totalEl) totalEl.innerText = '₹0';
+        if(msgEl) msgEl.innerText = 'Supabase not configured';
+        return;
+      }
       try{
         const list = await loadDonations();
+        const total = (list || []).reduce((s,it)=> s + (Number(it.amount)||0), 0);
+        if(totalEl) totalEl.innerText = '₹' + total;
+        if(msgEl) msgEl.innerText = list && list.length
+          ? (list.length + ' donation(s) recorded online')
+          : 'No donations yet';
+      }catch(e){
+        console.warn('Error loading donations summary:', e);
+        if(totalEl) totalEl.innerText = '₹0';
+        if(msgEl) msgEl.innerText = 'Could not load donations';
+      }
+    }
+
+    function populateDonationMonthFilter(){
+      const sel = document.getElementById('donMonthFilter');
+      if(!sel) return;
+      const prev = sel.value;
+      const monthsMap = new Map();
+      (donationsCache || []).forEach(d=>{
+        if(!d.created_at) return;
+        const dt = new Date(d.created_at);
+        if(isNaN(dt)) return;
+        const y = dt.getFullYear();
+        const m = dt.getMonth(); // 0-11
+        const key = y + '-' + String(m+1).padStart(2,'0');
+        const label = dt.toLocaleString(undefined,{month:'short',year:'numeric'});
+        if(!monthsMap.has(key)) monthsMap.set(key,label);
+      });
+      sel.innerHTML = '<option value="">All months</option>';
+      monthsMap.forEach((label,key)=>{
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = label;
+        sel.appendChild(opt);
+      });
+      if(prev && monthsMap.has(prev)) sel.value = prev;
+    }
+
+    function renderDonationsChart(list){
+      const canvas = document.getElementById('donationsChart');
+      if(!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.clientWidth || 600;
+      const h = canvas.height || 220;
+      canvas.width = w;
+      canvas.height = h;
+      ctx.clearRect(0,0,w,h);
+
+      if(!list || list.length === 0){
+        ctx.fillStyle = '#9ca3af';
+        ctx.font = '13px system-ui';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('No donations to display', w/2, h/2);
+        return;
+      }
+
+      // aggregate by date
+      const totals = new Map(); // key: yyyy-mm-dd, value: sum
+      list.forEach(d=>{
+        const dt = d.created_at ? new Date(d.created_at) : null;
+        if(!dt || isNaN(dt)) return;
+        const key = dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
+        const cur = totals.get(key) || 0;
+        totals.set(key, cur + (Number(d.amount)||0));
+      });
+
+      const entries = Array.from(totals.entries()).sort((a,b)=> new Date(a[0]) - new Date(b[0]));
+      if(entries.length === 0){
+        ctx.fillStyle = '#9ca3af';
+        ctx.font = '13px system-ui';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('No donations to display', w/2, h/2);
+        return;
+      }
+
+      const amounts = entries.map(e=>e[1]);
+      const maxVal = Math.max(...amounts);
+      if(maxVal <= 0){
+        ctx.fillStyle = '#9ca3af';
+        ctx.font = '13px system-ui';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('No positive amounts to display', w/2, h/2);
+        return;
+      }
+
+      const paddingLeft = 40;
+      const paddingRight = 10;
+      const paddingTop = 10;
+      const paddingBottom = 30;
+      const chartWidth = w - paddingLeft - paddingRight;
+      const chartHeight = h - paddingTop - paddingBottom;
+      const count = entries.length;
+      const gap = chartWidth / count;
+      const barWidth = gap * 0.6;
+      const baselineY = paddingTop + chartHeight;
+
+      // axis line
+      ctx.strokeStyle = '#e5e7eb';
+      ctx.beginPath();
+      ctx.moveTo(paddingLeft, baselineY);
+      ctx.lineTo(w - paddingRight, baselineY);
+      ctx.stroke();
+
+      ctx.font = '11px system-ui';
+      ctx.textAlign = 'center';
+
+      entries.forEach((entry, index)=>{
+        const dateKey = entry[0];
+        const val = entry[1];
+        const ratio = val / maxVal;
+        const barHeight = ratio * chartHeight;
+        const xCenter = paddingLeft + gap*index + gap/2;
+        const yTop = baselineY - barHeight;
+
+        // bar
+        ctx.fillStyle = 'rgba(16,185,129,0.85)';
+        ctx.fillRect(xCenter - barWidth/2, yTop, barWidth, barHeight);
+
+        // value label
+        ctx.fillStyle = '#0f172a';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('₹' + val, xCenter, yTop - 3);
+
+        // date label
+        const dt = new Date(dateKey);
+        const label = !isNaN(dt) ? dt.toLocaleDateString(undefined,{day:'2-digit',month:'short'}) : dateKey;
+        ctx.fillStyle = '#6b7280';
+        ctx.textBaseline = 'top';
+        ctx.fillText(label, xCenter, baselineY + 4);
+      });
+    }
+
+    async function renderDonationsTable(fresh = true){
+      const tbody = document.querySelector('#donationsTable tbody');
+      tbody.innerHTML = '<tr><td colspan="4" class="muted">Loading...</td></tr>';
+      if(!sb){
+        tbody.innerHTML = '<tr><td colspan="4" class="muted">Supabase not configured.</td></tr>';
+        renderDonationsChart([]);
+        return;
+      }
+      try{
+        if(fresh){
+          await loadDonations();
+          populateDonationMonthFilter();
+        }
+        let list = donationsCache || [];
+
+        const searchEl = document.getElementById('donSearch');
+        const monthEl = document.getElementById('donMonthFilter');
+        const sortEl = document.getElementById('donSort');
+
+        const search = (searchEl && searchEl.value || '').trim().toLowerCase();
+        const monthVal = (monthEl && monthEl.value) || '';
+        const sortVal = (sortEl && sortEl.value) || 'latest';
+
+        // filter
+        let filtered = list.filter(it=>{
+          let ok = true;
+          if(search){
+            const name = (it.name || '').toLowerCase();
+            ok = name.includes(search);
+          }
+          if(ok && monthVal){
+            const dt = it.created_at ? new Date(it.created_at) : null;
+            if(!dt || isNaN(dt)) return false;
+            const key = dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0');
+            if(key !== monthVal) ok = false;
+          }
+          return ok;
+        });
+
+        // sort
+        const arr = filtered.slice();
+        if(sortVal === 'oldest'){
+          arr.sort((a,b)=> new Date(a.created_at) - new Date(b.created_at));
+        } else if(sortVal === 'amount-high'){
+          arr.sort((a,b)=> (Number(b.amount)||0) - (Number(a.amount)||0));
+        } else if(sortVal === 'amount-low'){
+          arr.sort((a,b)=> (Number(a.amount)||0) - (Number(b.amount)||0));
+        } else {
+          // latest (default)
+          arr.sort((a,b)=> new Date(b.created_at) - new Date(a.created_at));
+        }
+
         tbody.innerHTML = '';
-        if(!list || list.length===0){
-          tbody.innerHTML = '<tr><td colspan="4" class="muted">No donations saved</td></tr>';
+        if(!arr || arr.length===0){
+          tbody.innerHTML = '<tr><td colspan="4" class="muted">No donations match current filters</td></tr>';
+          renderDonationsChart([]);
           return;
         }
-        list.forEach(it=>{
+        arr.forEach(it=>{
           const tr = document.createElement('tr');
-          const when = fmtDate(it.created);
-          tr.innerHTML = `<td>${escapeHtml(it.donor||'—')}</td><td>₹${escapeHtml(String(it.amount||''))}</td><td class="muted small">${escapeHtml(when)}</td><td></td>`;
+          const when = fmtDate(it.created_at);
+          tr.innerHTML = `<td>${escapeHtml(it.name || 'Anonymous')}</td>
+                          <td>₹${escapeHtml(String(it.amount || ''))}</td>
+                          <td class="muted small">${escapeHtml(when)}</td>
+                          <td></td>`;
           const actions = tr.querySelector('td:last-child');
+
+          const viewBtn = document.createElement('button');
+          viewBtn.textContent = 'View proof';
+          viewBtn.className = 'secondary';
+          viewBtn.style.marginRight = '6px';
+          viewBtn.addEventListener('click', ()=>{
+            if(it.screenshot_url){
+              window.open(it.screenshot_url, '_blank');
+            }else{
+              alert('No screenshot available for this donation.');
+            }
+          });
+
           const delBtn = document.createElement('button');
           delBtn.textContent='Delete';
           delBtn.className='secondary';
           delBtn.addEventListener('click', async ()=>{
-            if(!confirm('Delete this donation?')) return;
+            if(!confirm('Delete this donation record from Supabase?')) return;
             try{
-              const listNow = await loadDonations();
-              const filtered = listNow.filter(d => d.id !== it.id);
-              await saveDonations(filtered);
-              await renderDonationsTable();
+              await sb.from(SUPABASE_DON_TABLE).delete().eq('id', it.id);
+              await loadDonations();
+              await renderDonationsTable(false);
               await renderDonationsSummary();
             }catch(e){
-              alert('Delete failed: ' + e.message);
+              alert('Delete failed: ' + (e.message || e));
             }
           });
+
+          actions.appendChild(viewBtn);
           actions.appendChild(delBtn);
           tbody.appendChild(tr);
         });
+
+        // update chart with filtered list
+        renderDonationsChart(arr);
       }catch(e){
-        tbody.innerHTML = '<tr><td colspan="4" class="muted">Could not load donations: ' + escapeHtml(e.message) + '</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="muted">Could not load donations: ' + escapeHtml(e.message || e) + '</td></tr>';
+        renderDonationsChart([]);
       }
     }
 
@@ -765,7 +986,7 @@
           container.appendChild(wrap);
         });
       }catch(e){
-        container.innerHTML = '<div class="muted small">Could not load explore images: ' + escapeHtml(e.message) + '</div>';
+        container.innerHTML = '<div class="muted small">Could not load explore images: ' + escapeHtml(e.message || e) + '</div>';
       }
     }
 
@@ -930,7 +1151,7 @@
           tbody.appendChild(tr);
         });
       }catch(e){
-        tbody.innerHTML = '<tr><td colspan="4" class="muted">Could not load volunteers: ' + escapeHtml(e.message) + '</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="muted">Could not load volunteers: ' + escapeHtml(e.message || e) + '</td></tr>';
       }
     }
 
@@ -974,90 +1195,43 @@
       btn.addEventListener('click', ()=>{ document.getElementById('customAmount').value = btn.innerText.replace(/[^0-9]/g,''); });
     });
 
-    // DONATE HANDLER (LOCAL ONLY, QR IMAGE)
-    document.getElementById('donateBtn').addEventListener('click', async () => {
+    // ---------- DONATE HANDLER (JUST REDIRECT TO PAYMENT PAGE) ----------
+    document.getElementById('donateBtn').addEventListener('click', () => {
       const amtStr = (document.getElementById('customAmount').value || '').trim();
       const amt = Number(amtStr);
-      if(!amt || amt <= 0){ alert('Enter a valid donation amount.'); return; }
-
-      const donorName = prompt('Enter your name (optional)') || '';
-
-      const imgUrl = 'sampleqr.jpeg';
-
-      const overlay = document.createElement('div');
-      overlay.className = 'qr-modal-overlay';
-      overlay.innerHTML = `
-        <div class="qr-modal" role="dialog" aria-modal="true" aria-label="Donation Image">
-          <h4>Donation Image</h4>
-          <img src="${imgUrl}" alt="Donation image" />
-          <div style="font-size:13px;color:#374151;margin-top:8px">Amount: ₹${amt}</div>
-          <div class="qr-actions">
-            <button class="done">Done</button>
-            <button class="cancel">Cancel</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(overlay);
-
-      function goHome() {
-        try {
-          if (location.protocol === 'file:') {
-            const currentFile = location.pathname.split('/').pop();
-            if (currentFile) window.location.href = currentFile;
-            else window.location.reload();
-          } else {
-            window.location.href = '/';
-          }
-        } catch (e) {
-          window.location.reload();
-        }
+      if(!amt || amt <= 0){
+        alert('Enter a valid donation amount.');
+        return;
       }
-
-      overlay.querySelector('button.done').addEventListener('click', async () => {
-        try {
-          const donationsRaw = localStorage.getItem(DON_KEY);
-          const donations = donationsRaw ? JSON.parse(donationsRaw) : [];
-          const donation = {
-            id: 'local_' + (Date.now().toString(36) + Math.random().toString(36).slice(2,6)),
-            donor: donorName || 'Anonymous',
-            amount: amt,
-            method: 'image',
-            image: imgUrl,
-            created: new Date().toISOString()
-          };
-          donations.push(donation);
-          await saveDonations(donations);
-
-          try { await renderDonationsSummary(); await renderDonationsTable(); } catch(e){}
-
-          document.body.removeChild(overlay);
-          alert('Thank you! Donation recorded locally.');
-        } catch (err) {
-          try { document.body.removeChild(overlay); } catch(e){}
-          alert('Could not save donation locally: ' + (err && err.message ? err.message : err));
-        } finally {
-          goHome();
-        }
-      });
-
-      overlay.querySelector('button.cancel').addEventListener('click', () => {
-        try { document.body.removeChild(overlay); } catch(e){}
-        goHome();
-      });
+      const donorName = prompt('Enter your name (optional)') || '';
+      const targetUrl = 'payment.html?amount=' + encodeURIComponent(amt) + '&name=' + encodeURIComponent(donorName);
+      window.location.href = targetUrl;
     });
 
-    // export donations CSV
+    // export donations CSV (from Supabase)
     document.getElementById('donExport').addEventListener('click', async ()=>{
+      if(!sb){
+        alert('Supabase not configured for donations.');
+        return;
+      }
       try {
+        // always load fresh for export
         const list = await loadDonations();
         if(!list || list.length===0){ alert('No donations to export'); return; }
-        const rows = [['Donor','Amount','Created']];
-        for(const r of list) rows.push([r.donor||'', r.amount||'', r.created||'']);
+        const rows = [['Name','Amount','Created','Screenshot URL']];
+        for(const r of list){
+          rows.push([
+            r.name || 'Anonymous',
+            r.amount || '',
+            r.created_at || '',
+            r.screenshot_url || ''
+          ]);
+        }
         const csv = rows.map(r => r.map(cell => `"${(cell+'').replace(/"/g,'""')}"`).join(',')).join('\n');
         const blob = new Blob([csv], {type:'text/csv'});
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a'); a.href = url; a.download = 'masjid_donations.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-      } catch(e){ alert('Export failed: '+e.message); }
+      } catch(e){ alert('Export failed: '+(e.message || e)); }
     });
 
     // export volunteers CSV
@@ -1115,7 +1289,7 @@
         document.getElementById('authMsg').innerText = '';
         document.getElementById('adminStatus').innerText = 'Logged in as ' + fixedUsername;
         await renderAdminTable();
-        await renderDonationsTable();
+        await renderDonationsTable(true);
         await renderExploreAdminList();
         await syncOnlineMessageUI();
       } catch(err){
@@ -1148,7 +1322,7 @@
       document.getElementById('adminVolsWrap').style.display='none';
       document.getElementById('adminDonsWrap').style.display='';
       document.getElementById('adminExploreWrap').style.display='none';
-      renderDonationsTable();
+      renderDonationsTable(true);
     });
     document.getElementById('tabExplore').addEventListener('click', ()=>{
       document.getElementById('tabExplore').classList.add('active');
@@ -1159,6 +1333,11 @@
       document.getElementById('adminExploreWrap').style.display='';
       renderExploreAdminList();
     });
+
+    // filter/search listeners for donations
+    document.getElementById('donSearch').addEventListener('input', ()=>renderDonationsTable(false));
+    document.getElementById('donMonthFilter').addEventListener('change', ()=>renderDonationsTable(false));
+    document.getElementById('donSort').addEventListener('change', ()=>renderDonationsTable(false));
 
     // upload explore image (Supabase)
     document.getElementById('uploadExplore').addEventListener('click', async ()=>{
@@ -1218,14 +1397,27 @@
 
     document.getElementById('clearOnlineMsg').classList.add('secondary');
 
-    // wipe donations (local)
+    // wipe donations (Supabase)
     document.getElementById('wipeDonations').addEventListener('click', async ()=>{
-      if(!confirm('Wipe ALL donations stored on this device? This cannot be undone.')) return;
+      if(!sb){
+        alert('Supabase not configured for donations.');
+        return;
+      }
+      if(!confirm('Wipe ALL donations from Supabase? This cannot be undone.')) return;
       try {
-        await saveDonations([]);
-        await renderDonationsTable();
+        const list = await loadDonations();
+        for(const d of list){
+          try{
+            await sb.from(SUPABASE_DON_TABLE).delete().eq('id', d.id);
+          }catch(e){
+            console.warn('Failed to delete donation with id', d.id, e);
+          }
+        }
+        await loadDonations();
+        await renderDonationsTable(false);
         await renderDonationsSummary();
-      } catch(e){ alert('Failed: '+e.message); }
+        alert('All donations deleted from Supabase table.');
+      } catch(e){ alert('Failed: '+(e.message || e)); }
     });
 
     // small header slideshow
@@ -1274,9 +1466,8 @@
         document.getElementById('adminPanel').style.display='block';
         document.getElementById('adminStatus').innerText = 'Logged in';
         await renderAdminTable();
-        await renderDonationsTable();
+        await renderDonationsTable(true);
         await renderExploreAdminList();
-        // Online message already synced above
       }
     })();
   </script>
