@@ -1,0 +1,340 @@
+ <!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Confirm Payment – GMCC</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="logo1.png" sizes="32x32" type="image/png">
+
+  <style>
+    :root{
+      --accent:#0b6b4f;
+      --accent-soft:#e6fff4;
+      --muted:#6b7280;
+      --bg:#f3f4f6;
+      --danger:#b91c1c;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:16px;
+      background:radial-gradient(circle at top left,#bbf7d0,#f9fafb);
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:#111827;
+    }
+    .card{
+      width:100%;
+      max-width:520px;
+      background:white;
+      border-radius:18px;
+      padding:20px 20px 18px;
+      box-shadow:0 18px 45px rgba(15,118,110,0.16);
+      border:1px solid #e5e7eb;
+    }
+    .top-logo{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .top-logo img{height:32px;width:auto;border-radius:8px;}
+    h1{
+      margin:0 0 4px;
+      font-size:22px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    h1 span.badge{
+      font-size:12px;
+      padding:2px 8px;
+      border-radius:999px;
+      background:#ecfdf5;
+      color:#047857;
+      border:1px solid #a7f3d0;
+    }
+    p.lead{margin:4px 0 12px;font-size:14px;color:var(--muted);}
+    label{display:block;margin:10px 0 4px;font-size:13px;color:var(--muted);}
+    input[type=text],input[type=number],input[type=file],textarea{
+      width:100%;
+      font-size:14px;
+      padding:9px 10px;
+      border-radius:10px;
+      border:1px solid #e5e7eb;
+      outline:none;
+    }
+    input[readonly]{
+      background:#f9fafb;
+      color:#4b5563;
+    }
+    input:focus,textarea:focus{
+      border-color:#0ea5e9;
+      box-shadow:0 0 0 1px #0ea5e9;
+    }
+    textarea{min-height:70px;resize:vertical;}
+    .row{display:flex;gap:10px;flex-wrap:wrap;}
+    .row > div{flex:1;min-width:0;}
+    .buttons{margin-top:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+    button{
+      border:0;
+      border-radius:999px;
+      padding:9px 18px;
+      font-weight:600;
+      cursor:pointer;
+      font-size:14px;
+    }
+    .btn-primary{
+      background:linear-gradient(135deg,#16a34a,#0f766e);
+      color:white;
+      box-shadow:0 10px 25px rgba(22,163,74,0.35);
+    }
+    .btn-primary:disabled{
+      opacity:.7;
+      cursor:wait;
+      box-shadow:none;
+    }
+    .btn-link{
+      background:transparent;
+      color:#0369a1;
+      padding-inline:4px;
+    }
+    .status{
+      margin-top:10px;
+      font-size:13px;
+      min-height:18px;
+    }
+    .status.error{color:var(--danger);}
+    .status.ok{color:#15803d;}
+    .hint{font-size:12px;color:#6b7280;margin-top:2px;}
+    .amount-display{
+      font-weight:700;
+      color:#047857;
+    }
+    .qr-box{
+      margin:10px 0 4px;
+      padding:10px;
+      border-radius:12px;
+      background:#f0fdf4;
+      border:1px dashed #bbf7d0;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+     .qr-box img{
+  width:300px;
+  height:300px;
+  object-fit:contain;
+  border-radius:12px;
+  background:white;
+  border:1px solid #e5e7eb;
+}
+
+    .qr-box div{font-size:13px;color:#065f46;}
+     @media (max-width:600px){
+  .qr-box img{
+    width:260px;
+    height:260px;
+  }
+}
+
+  </style>
+
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+</head>
+<body>
+  <div class="card">
+    <div class="top-logo">
+      <img src="LOGO.png" alt="GMCC logo">
+      <div>
+        <div style="font-weight:700;font-size:15px;">Gadwal Masjid Cleaning Camp</div>
+        <div style="font-size:12px;color:#6b7280;">Payment confirmation</div>
+      </div>
+    </div>
+
+    <h1>
+      Confirm your donation
+      <span class="badge">Step 2/2</span>
+    </h1>
+    <p class="lead">
+      Please upload a clear screenshot of your UPI/payment success screen so the admin can verify your donation.
+    </p>
+
+    <form id="payForm">
+      <div class="row">
+        <div>
+          <label>Donor name (optional)</label>
+          <input id="donorName" type="text" placeholder="Your name">
+          <div class="hint">If left empty, it will show as "Anonymous".</div>
+        </div>
+      </div>
+
+      <label style="margin-top:12px;">Amount (₹)</label>
+      <input id="amount" type="number" min="1" step="1" readonly>
+      <div class="hint">Comes from the previous page — please don’t change.</div>
+
+      <label style="margin-top:12px;">Transaction screenshot *</label>
+      <input id="proof" type="file" accept="image/*" required>
+      <div class="hint">Upload a clear screenshot of the payment success screen (max ~5–8 MB recommended).</div>
+
+      <div class="qr-box">
+        <img src="sampleqr.jpeg" alt="Donation QR">
+        <div>
+          First, scan this QR to pay. Then upload the success screenshot here and submit confirm.
+          <div class="hint" style="margin-top:4px;">
+            Amount selected: <span id="amountDisplay" class="amount-display">₹0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button class="btn-primary" type="submit" id="submitBtn">Submit Confirmation</button>
+        <button class="btn-link" type="button" onclick="goBack()">← Back to main site</button>
+      </div>
+
+      <div id="status" class="status"></div>
+    </form>
+  </div>
+
+  <script>
+    // ------------ Supabase config ------------
+    const SUPABASE_URL  = "https://exbzojdbxlxjxklkdbxz.supabase.co";
+    const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4YnpvamRieGx4anhrbGtkYnh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNDM4MDMsImV4cCI6MjA3OTcxOTgwM30.6pM8kZPzp5uAtMgfg6n-0565EDi6piAt3S6W5B_sOI8";
+    const SUPABASE_BUCKET = "explore";       // existing bucket you already use
+    const SUPABASE_TABLE  = "donations";     // SAME table as admin panel
+
+    let sb = null;
+    if (typeof supabase !== "undefined") {
+      sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    } else {
+      console.error("Supabase library not loaded");
+    }
+
+    function goBack(){
+      // change this if your main file is not index.html
+      window.location.href = "index.html";
+    }
+
+    // ------ Pre-fill from query (?amount=&name=) ------
+    (function initFromQuery(){
+      const params = new URLSearchParams(window.location.search);
+      const amt = params.get("amount");
+      const name = params.get("name");
+      if (amt) {
+        document.getElementById("amount").value = amt;
+        document.getElementById("amountDisplay").innerText = "₹" + amt;
+      }
+      if (name) {
+        document.getElementById("donorName").value = decodeURIComponent(name);
+      }
+    })();
+
+    // just to keep display synced if you ever unlock the field
+    document.getElementById("amount").addEventListener("input", () => {
+      const v = document.getElementById("amount").value || "0";
+      document.getElementById("amountDisplay").innerText = "₹" + v;
+    });
+
+    async function uploadProofImage(file){
+      if (!sb) throw new Error("Supabase not initialised");
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const id  = "proof_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2,8) + "." + ext;
+      const path = "proofs/" + id;  // folder inside bucket
+
+      const { error: uploadError } = await sb
+        .storage
+        .from(SUPABASE_BUCKET)
+        .upload(path, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: publicData } = sb
+        .storage
+        .from(SUPABASE_BUCKET)
+        .getPublicUrl(path);
+
+      return publicData.publicUrl;
+    }
+
+    document.getElementById("payForm").addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      const statusEl = document.getElementById("status");
+      const btn = document.getElementById("submitBtn");
+      statusEl.className = "status";
+      statusEl.textContent = "";
+
+      if (!sb){
+        statusEl.classList.add("error");
+        statusEl.textContent = "Supabase client not ready.";
+        return;
+      }
+
+      const nameRaw  = (document.getElementById("donorName").value || "").trim();
+      const name = nameRaw || "Anonymous";
+      const amtStr = (document.getElementById("amount").value || "").trim();
+      const amt = Number(amtStr);
+      const fileInput = document.getElementById("proof");
+      const file = fileInput.files[0];
+
+      if (!amt || amt <= 0){
+        statusEl.classList.add("error");
+        statusEl.textContent = "Amount is missing. Please go back and choose an amount again.";
+        alert("Amount is empty. Please go back to the main page and click Donate again.");
+        return;
+      }
+      if (!file){
+        statusEl.classList.add("error");
+        statusEl.textContent = "Please choose a transaction screenshot image.";
+        alert("Please choose a transaction screenshot file.");
+        return;
+      }
+      if (file.size > 8 * 1024 * 1024){
+        statusEl.classList.add("error");
+        statusEl.textContent = "File is too large. Please upload an image under ~8 MB.";
+        alert("File too large. Please upload an image under ~8 MB.");
+        return;
+      }
+
+      btn.disabled = true;
+      statusEl.textContent = "Uploading screenshot and saving confirmation…";
+
+      try {
+        // 1) Upload image
+        const proofUrl = await uploadProofImage(file);
+
+        // 2) Insert into donations table
+        const { error } = await sb
+          .from(SUPABASE_TABLE)
+          .insert({
+            name: name,
+            amount: amt,
+            screenshot_url: proofUrl
+          });
+
+        if (error) throw error;
+
+        statusEl.classList.add("ok");
+        statusEl.textContent = "Alhamdulillah! Your payment confirmation has been saved successfully. You can return to the main site.";
+        alert("Payment confirmation saved successfully. JazakAllahu khairan!");
+
+        // clear file input so user can see something happened
+        fileInput.value = "";
+      } catch (err){
+        console.error("Save error:", err);
+        statusEl.classList.add("error");
+        statusEl.textContent = "Could not save payment confirmation: " + (err.message || err);
+        alert("Error: " + (err.message || err));
+        btn.disabled = false;
+        return;
+      }
+
+      // re-enable button after a few seconds if they want to send another
+      setTimeout(()=>{ btn.disabled = false; }, 3000);
+    });
+  </script>
+</body>
+</html>
